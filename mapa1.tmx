@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="25" height="20" tilewidth="32" tileheight="32" nextobjectid="7">
+ <objectgroup name="limite">
+  <object id="1" x="0" y="32" width="32" height="576"/>
+  <object id="2" x="32" y="608" width="736" height="32"/>
+  <object id="3" x="768" y="32" width="32" height="576"/>
+  <object id="4" x="32" y="0" width="736" height="32"/>
+ </objectgroup>
+ <objectgroup name="obs">
+  <object id="6" x="576" y="288" width="96" height="96"/>
+ </objectgroup>
+</map>

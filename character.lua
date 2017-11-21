@@ -8,16 +8,21 @@ function char.new(w, x, y, r, bType, enableEntity)
 	s.moving = false
 	s.shape = love.physics.newCircleShape(r or 16)
 	s.attack = false
+	s.isHurt = false
+	s.tRecover = 0.7
+	s.tStart = love.timer.getTime()
 	if enableEntity == nil or enableEntity == true then
 		s.enableEntity = true
 	else
 		s.enableEntity = false
 	end
 	s.fixt = love.physics.newFixture(s.body, s.shape)
+	s.fixt:setRestitution(0.9)
 	s.stage = nil
 	s.id = nil
 	s.color = {r = 23, g = 128, b = 98}
 	s.colorAttack = {r = 228, g = 135, b = 49}
+	s.force = 500
 	setmetatable(s, char_mt)
 	return s
 end
@@ -74,14 +79,21 @@ function char:draw()
 end
 
 function p.push(obj, x, y)
-	obj.body:applyForce(100*(obj.body:getX() - x), 100*(obj.body:getY() - y))
+	vec = {x = obj.body:getX() - x, y = obj.body:getY() - y}
+	mod = math.sqrt(math.pow(vec.x, 2) + math.pow(vec.y, 2))
+	alpha = math.atan2(vec.y, vec.x)
+	print("alpha = " .. 180 * alpha / math.pi,  alpha)
+	-- pi r -- 90
+	-- x r -- y rad
+	-- y = x * 90/pi
+	--obj.body:applyForce(obj.force * math.cos(alpha), obj.force * math.sin(alpha))
+	obj.body:applyLinearImpulse(obj.force * math.cos(alpha), obj.force * math.sin(alpha))
 end
 
 function char:hurt(signal, x, y)
 	if signal then
+		self.tStart = love.timer.getTime()
 		self.color = {r = 255, g = 0, b = 0}
-	else
-		self.color = {r = 23, g = 128, b = 98}
 	end
 	p.push(self, x, y)
 end
@@ -98,6 +110,23 @@ end
 function char:update()
 	p.move(self)
 	p.attack(self)
+	self.isHurt = (love.timer.getTime() - self.tStart) > self.tRecover
+	if self.isHurt then
+		self.color = {r = 23, g = 128, b = 98}
+	end
+	-- print(self.body:getX(), self.body:getY())
+end
+
+function char:getX()
+	return self.body:getX()
+end
+
+function char:getY()
+	return self.body:getY()
+end
+
+function char:getID()
+	return self.id
 end
 
 return char

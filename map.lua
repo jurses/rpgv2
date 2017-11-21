@@ -9,7 +9,7 @@ function p.obtFixtT(layers, world)
 	for i, v in ipairs(layers) do
 		if v.type == "objectgroup" then
 			for j, w in ipairs(v.objects) do
-				auxBody = love.physics.newBody(world, (w.x + w.width)/2, (w.y + w.height)/2, "static")
+				auxBody = love.physics.newBody(world, (w.x + w.width/2), (w.y + w.height/2), "static")
 				auxShape = love.physics.newRectangleShape(w.width, w.height)
 				table.insert(fixT, love.physics.newFixture(auxBody, auxShape))
 			end
@@ -39,7 +39,7 @@ end
 
 function map:draw()
 	love.graphics.setColor(255, 255, 255)
-	love.graphics(self.canvas)
+	love.graphics.draw(self.canvas)
 end
 
 return map

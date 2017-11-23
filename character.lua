@@ -41,6 +41,7 @@ function p.move(obj)
 	love.keyboard.isDown("a") or
 	love.keyboard.isDown("s") or
 	love.keyboard.isDown("d")) then
+		obj.body:setType("dynamic")
 		if love.keyboard.isDown("w") then
 			obj.body:setLinearVelocity(0, -200)
 			obj.moving = true
@@ -64,8 +65,11 @@ function p.move(obj)
 			obj.body:setLinearVelocity(200 * math.cos(45), 200 * math.sin(45))
 		end
 	elseif obj.moving then
-			obj.body:setLinearVelocity(0, 0)
-			obj.moving = false
+		obj.body:setLinearVelocity(0, 0)
+		if not obj.isHurt then
+			obj.body:setType("static")
+		end
+		obj.moving = false
 	end
 end
 
@@ -83,10 +87,7 @@ function p.push(obj, x, y)
 	mod = math.sqrt(math.pow(vec.x, 2) + math.pow(vec.y, 2))
 	alpha = math.atan2(vec.y, vec.x)
 	print("alpha = " .. 180 * alpha / math.pi,  alpha)
-	-- pi r -- 90
-	-- x r -- y rad
-	-- y = x * 90/pi
-	--obj.body:applyForce(obj.force * math.cos(alpha), obj.force * math.sin(alpha))
+	obj.body:setType("dynamic")
 	obj.body:applyLinearImpulse(obj.force * math.cos(alpha), obj.force * math.sin(alpha))
 end
 
@@ -107,14 +108,19 @@ function p.attack(obj)
 	end
 end
 
+function p.status(obj)
+	obj.isHurt = (love.timer.getTime() - obj.tStart) > obj.tRecover
+	if obj.isHurt then
+		obj.color = {r = 23, g = 128, b = 98}
+	end
+end
+
 function char:update()
 	p.move(self)
 	p.attack(self)
-	self.isHurt = (love.timer.getTime() - self.tStart) > self.tRecover
-	if self.isHurt then
-		self.color = {r = 23, g = 128, b = 98}
-	end
-	-- print(self.body:getX(), self.body:getY())
+	p.status(self)
+	
+	print(self.id .. ", " .. self.body:getType() .. ", " .. string.format("%s", self.isHurt))
 end
 
 function char:getX()

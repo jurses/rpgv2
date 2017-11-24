@@ -1,14 +1,17 @@
 local char = {}
 local p = {}
 local char_mt = {__index = char}
+local energyBall = require("energyBall")
 
 function char.new(w, x, y, r, bType, enableEntity)
 	local s = {}
+	s.type = "character"
 	s.body = love.physics.newBody(w, x, y, bType or "dynamic")
+	s.direction = "down"
 	s.moving = false
 	s.shape = love.physics.newCircleShape(r or 16)
 	s.attack = false
-	s.isHurt = false
+	s.isNormal = true
 	s.tRecover = 0.7
 	s.tStart = love.timer.getTime()
 	if enableEntity == nil or enableEntity == true then
@@ -23,8 +26,13 @@ function char.new(w, x, y, r, bType, enableEntity)
 	s.color = {r = 23, g = 128, b = 98}
 	s.colorAttack = {r = 228, g = 135, b = 49}
 	s.force = 500
+	s.energyBall = nil
 	setmetatable(s, char_mt)
 	return s
+end
+
+function char:obtType()
+	return self.type
 end
 
 function char:giveChar()
@@ -36,40 +44,62 @@ function char:getStg(stage, id)
 	self.id = id
 end
 
+function char:shootEnergyBall()
+	self.stage:register(energyBall.new(self.body:getWorldCenter(), self.id, self.direction))
+end
+
 function p.move(obj)
-	if obj.enableEntity and (love.keyboard.isDown("w") or
-	love.keyboard.isDown("a") or
-	love.keyboard.isDown("s") or
-	love.keyboard.isDown("d")) then
-		obj.body:setType("dynamic")
+	if obj.enableEntity then
 		if love.keyboard.isDown("w") then
+			obj.moving = true
+			obj.body:setType("dynamic")
 			obj.body:setLinearVelocity(0, -200)
-			obj.moving = true
+			obj.direction = "up"
 		elseif love.keyboard.isDown("a") then
+			obj.moving = true
+			obj.body:setType("dynamic")
 			obj.body:setLinearVelocity(-200, 0)
-			obj.moving = true
+			obj.direction = "left"
 		elseif love.keyboard.isDown("s") then
+			obj.moving = true
+			obj.body:setType("dynamic")
 			obj.body:setLinearVelocity(0, 200)
-			obj.moving = true
+			obj.direction = "down"
 		elseif love.keyboard.isDown("d") then
-			obj.body:setLinearVelocity(200, 0)
 			obj.moving = true
+			obj.body:setType("dynamic")
+			obj.body:setLinearVelocity(200, 0)
+			obj.direction = "right"
+		else
+			obj.moving = false
 		end
 		if love.keyboard.isDown("w") and love.keyboard.isDown("a") then
+			obj.moving = true
+			obj.body:setType("dynamic")
 			obj.body:setLinearVelocity(-200 * math.cos(45), -200 * math.sin(45))
+			obj.direction = "upleft"
 		elseif love.keyboard.isDown("w") and love.keyboard.isDown("d") then
+			obj.moving = true
+			obj.body:setType("dynamic")
 			obj.body:setLinearVelocity(200 * math.cos(45), -200 * math.sin(45))
+			obj.direction = "upright"
 		elseif love.keyboard.isDown("s") and love.keyboard.isDown("a") then
+			obj.moving = true
+			obj.body:setType("dynamic")
 			obj.body:setLinearVelocity(-200 * math.cos(45), 200 * math.sin(45))
+			obj.direction = "downleft"
 		elseif love.keyboard.isDown("s") and love.keyboard.isDown("d") then
+			obj.moving = true
+			obj.body:setType("dynamic")
 			obj.body:setLinearVelocity(200 * math.cos(45), 200 * math.sin(45))
+			obj.direction = "downright"
 		end
-	elseif obj.moving then
-		obj.body:setLinearVelocity(0, 0)
-		if not obj.isHurt then
+	end
+	if not obj.moving then
+		if obj.isNormal then
+			obj.body:setLinearVelocity(0, 0)
 			obj.body:setType("static")
 		end
-		obj.moving = false
 	end
 end
 
@@ -82,21 +112,24 @@ function char:draw()
 	love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.shape:getRadius())
 end
 
-function p.push(obj, x, y)
+function p.push(obj, x, y, force)
 	vec = {x = obj.body:getX() - x, y = obj.body:getY() - y}
 	mod = math.sqrt(math.pow(vec.x, 2) + math.pow(vec.y, 2))
 	alpha = math.atan2(vec.y, vec.x)
-	print("alpha = " .. 180 * alpha / math.pi,  alpha)
 	obj.body:setType("dynamic")
-	obj.body:applyLinearImpulse(obj.force * math.cos(alpha), obj.force * math.sin(alpha))
+	obj.body:applyLinearImpulse(force * math.cos(alpha), force * math.sin(alpha))
 end
 
-function char:hurt(signal, x, y)
+function char:hurt(signal, x, y, force)
 	if signal then
 		self.tStart = love.timer.getTime()
 		self.color = {r = 255, g = 0, b = 0}
 	end
-	p.push(self, x, y)
+	p.push(self, x, y, force)
+end
+
+function char:getForce()
+	return self.force
 end
 
 function p.attack(obj)
@@ -104,13 +137,13 @@ function p.attack(obj)
 		obj.attack = love.keyboard.isDown("space")
 	end
 	if obj.attack then
-		obj.stage:charAttack(1.4, obj.id)
+		obj.stage:charAttack(1.4, obj.id, obj.force)
 	end
 end
 
 function p.status(obj)
-	obj.isHurt = (love.timer.getTime() - obj.tStart) > obj.tRecover
-	if obj.isHurt then
+	obj.isNormal = (love.timer.getTime() - obj.tStart) > obj.tRecover
+	if obj.isNormal then
 		obj.color = {r = 23, g = 128, b = 98}
 	end
 end
@@ -120,7 +153,7 @@ function char:update()
 	p.attack(self)
 	p.status(self)
 	
-	print(self.id .. ", " .. self.body:getType() .. ", " .. string.format("%s", self.isHurt))
+	--print(self.id .. ", " .. self.body:getType() .. ", " .. string.format("%s", self.moving))
 end
 
 function char:getX()

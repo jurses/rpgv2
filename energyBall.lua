@@ -11,7 +11,7 @@ function energyBall.new(x, y, id, direction)
     s.owner = id
     s.dir = direction
     s.speed = 100
-    s.force
+    s.force = 75
     s.type = "energyBall"
     setmetatable(s, energyBall_mt)
     return s

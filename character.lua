@@ -5,12 +5,14 @@ local energyBall = require("energyBall")
 
 function char.new(w, x, y, r, bType, enableEntity)
 	local s = {}
+	r = r or 16
 	s.type = "character"
 	s.body = love.physics.newBody(w, x, y, bType or "dynamic")
 	s.direction = "down"
 	s.moving = false
-	s.shape = love.physics.newCircleShape(r or 16)
+	s.shape = love.physics.newCircleShape(r)
 	s.attack = false
+	s.attackArea = {w = r * 3 or 24, h = r * 3 or 24}
 	s.isNormal = true
 	s.tRecover = 0.7
 	s.tStart = love.timer.getTime()
@@ -106,7 +108,8 @@ end
 function char:draw()
 	if self.attack then
 		love.graphics.setColor(self.colorAttack.r, self.colorAttack.g, self.colorAttack.b)
-		love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.shape:getRadius() * 1.4)
+		love.graphics.rectangle("fill", self.body:getX() - self.attackArea.w / 2, self.body:getY() - self.attackArea.h / 2, self.attackArea.w, self.attackArea.h)
+		--love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.shape:getRadius() * 1.5)
 	end
 	love.graphics.setColor(self.color.r, self.color.g, self.color.b)
 	love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.shape:getRadius())
@@ -137,7 +140,7 @@ function p.attack(obj)
 		obj.attack = love.keyboard.isDown("space")
 	end
 	if obj.attack then
-		obj.stage:charAttack(1.4, obj.id, obj.force)
+		obj.stage:charAttack(obj.id)
 	end
 end
 
@@ -154,6 +157,14 @@ function char:update()
 	p.status(self)
 	
 	--print(self.id .. ", " .. self.body:getType() .. ", " .. string.format("%s", self.moving))
+end
+
+function char:getPosition()
+	return self.body:getWorldCenter()
+end
+
+function char:getAttackArea()
+	return self.attackArea.w, self.attackArea.h
 end
 
 function char:getX()

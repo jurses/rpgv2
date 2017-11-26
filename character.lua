@@ -12,6 +12,7 @@ function char.new(w, x, y, r, bType, enableEntity)
 	s.moving = false
 	s.shape = love.physics.newCircleShape(r)
 	s.attack = false
+	s.dimensions = {w = 2 * r, h = 2 * r}
 	s.attackArea = {w = r * 3 or 24, h = r * 3 or 24}
 	s.isNormal = true
 	s.tRecover = 0.7
@@ -46,8 +47,10 @@ function char:getStg(stage, id)
 	self.id = id
 end
 
-function char:shootEnergyBall()
-	self.stage:register(energyBall.new(self.body:getWorldCenter(), self.id, self.direction))
+function p.shootEnergyBall(obj)
+	if love.keyboard.isDown("z") then
+		obj.stage:register(energyBall.new(obj.body:getX(), obj.body:getY(), obj.id, obj.direction))
+	end
 end
 
 function p.move(obj)
@@ -109,10 +112,13 @@ function char:draw()
 	if self.attack then
 		love.graphics.setColor(self.colorAttack.r, self.colorAttack.g, self.colorAttack.b)
 		love.graphics.rectangle("fill", self.body:getX() - self.attackArea.w / 2, self.body:getY() - self.attackArea.h / 2, self.attackArea.w, self.attackArea.h)
-		--love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.shape:getRadius() * 1.5)
 	end
+	love.graphics.setColor(255, 5, 100, 122)
+	love.graphics.rectangle("fill", self.body:getX() - self.dimensions.w/2, self.body:getY()- self.dimensions.h/2, self.dimensions.w, self.dimensions.h)
 	love.graphics.setColor(self.color.r, self.color.g, self.color.b)
 	love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.shape:getRadius())
+	love.graphics.setColor(self.colorAttack.r, self.colorAttack.g, self.colorAttack.b, 122)
+	love.graphics.rectangle("fill", self.body:getX() - self.attackArea.w / 2, self.body:getY() - self.attackArea.h / 2, self.attackArea.w, self.attackArea.h)
 end
 
 function p.push(obj, x, y, force)
@@ -155,7 +161,7 @@ function char:update()
 	p.move(self)
 	p.attack(self)
 	p.status(self)
-	
+	p.shootEnergyBall(self)	
 	--print(self.id .. ", " .. self.body:getType() .. ", " .. string.format("%s", self.moving))
 end
 
@@ -163,8 +169,16 @@ function char:getPosition()
 	return self.body:getWorldCenter()
 end
 
+function char:getCornerPos()
+	return self.body:getX() - self.dimensions.w/2, self.body:getY() - self.dimensions.h/2
+end
+
 function char:getAttackArea()
 	return self.attackArea.w, self.attackArea.h
+end
+
+function char:getAttackCornerPos()
+	return self.body:getX() - self.attackArea.w/2, self.body:getY() - self.attackArea.h/2
 end
 
 function char:getX()
@@ -173,6 +187,10 @@ end
 
 function char:getY()
 	return self.body:getY()
+end
+
+function char:getDimensions()
+	return self.dimensions.w, self.dimensions.h
 end
 
 function char:getID()

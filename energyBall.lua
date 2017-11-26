@@ -11,7 +11,7 @@ function energyBall.new(x, y, id, direction)
     s.owner = id
     s.dir = direction
     s.speed = 100
-    s.force = 75
+    s.force = 1
     s.type = "energyBall"
     setmetatable(s, energyBall_mt)
     return s
@@ -22,10 +22,8 @@ function energyBall:obtType()
 end
 
 function energyBall:getStg(stage, id)
-end
-
-function p.checkCollide(obj)
-
+    self.stage = stage
+    self.id = id
 end
 
 function energyBall:getID()
@@ -33,7 +31,8 @@ function energyBall:getID()
 end
 
 function energyBall:draw()
-    love.graphics.rectangle("fill", self.x, self.y, self.w, self.h)
+    love.graphics.setColor(255, 255, 0)
+    love.graphics.rectangle("fill", self.pos.x, self.pos.y, self.dim.w, self.dim.h)
 end
 
 function energyBall:update()
@@ -49,12 +48,21 @@ function energyBall:getPosition()
     return self.pos.x, self.pos.y
 end
 
+function energyBall:getX()
+    return self.pos.x + self.dim.w/2
+end
+
+function energyBall:getY()
+    return self.pos.y + self.dim.h/2
+end
+
 function energyBall:obtOwner()
     return self.owner
 end
 
 function p.forward(obj)
     dt = love.timer.getDelta()
+    print(obj.dir)
     if obj.dir == "up" then
         obj.pos.y = obj.pos.y - obj.speed * dt
     elseif obj.dir == "left" then

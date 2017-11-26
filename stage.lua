@@ -34,64 +34,55 @@ function stg:update(dt)
 	for i, v in ipairs(self.entityC) do
 		v:update()
 	end
+	for i, v in ipairs(self.entityEB) do
+		v:update()
+	end
 end
 
-function p.isIn(s1, r, s2)
-	pos1 = {x = s1:getBody():getX(), y = s1:getBody():getY()}
-	radius1 = r * s1:getShape():getRadius()
-	pos2 = {x = s2:getBody():getX(), y = s2:getBody():getY()}
-	radius2 = s2:getShape():getRadius()
-	return math.pow(pos2.x - pos1.x, 2) + math.pow(pos1.y - pos2.y, 2) <= math.pow(radius1 + radius2, 2)
-end
-
-function p.checkCollision(obj1, obj2)
-	return obj1.x < obj2.x + obj2.w and
-	obj2.x < obj1.x + obj1.x + obj1.w and
-	obj1.y < obj2.y + obj2.h and
-	obj2.y < obj1.y + obj1.h
+function p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
+	return x1 < x2 + w2 and
+			x2 < x1 + w1 and
+			y1 < y2 + h2 and
+			y2 < y1 + h1
 end
 
 function stg:charAttack(id)
-	data1 = {}
-	data1.x, data1.y = self.entityC[id]:getPosition()
-	data1.w, data1.h = self.entityC[id]:getAttackArea()
-	data2 = {}
+	d1 = {}
+	d1.x, d1.y = self.entityC[id]:getAttackCornerPos()
+	x, y = self.entityC[id]:getPosition()
+	d1.w, d1.h = self.entityC[id]:getAttackArea()
+	d2 = {}
 	for i, v in ipairs(self.entityC) do
-		data2.x, data2.y = v:getPosition()
-		data2.w, data2.h = v:getAttackArea()
-		if id ~= i and p.checkCollision(data1, data2) then
-			v:hurt(true, data1.x, data1.y, self.entityC[id]:getForce())
+		d2.x, d2.y = v:getCornerPos()
+		d2.w, d2.h = v:getDimensions()
+		if id ~= i and p.checkCollision(d1.x, d1.y, d1.w, d1.h, d2.x, d2.y, d2.w, d2.h) then
+			v:hurt(true, x, y, self.entityC[id]:getForce())
 		end
 	end
 end
-
---[[
-function stg:charAttack(radius, id, force)
-	for i, v in ipairs(self.entityC) do
-		if id ~= i then
-			if p.isIn(self.entityC[id]:giveChar(), radius, v:giveChar()) then
-				v:hurt(true, self.entityC[id]:giveChar():getBody():getX(), self.entityC[id]:giveChar():getBody():getY(), force)
-			end
-		end
-	end
-end
-]]
 
 function stg:collideEB(id, force)
+	x1, y1 = self.entityEB[id]:getPosition()
+	w1, h1 = self.entityEB[id]:getDimensions()
 	for i, v in ipairs(self.entityC) do
-		if v:obtOwner() ~= i then
-			if p.isInCEB(self.entityEB[id]:getPosition(), self.entityEB[id]:getDimensions(), v:giveChar()) then
-				v:hurt(true, self.entityEB[id]:getPosition(), force)
-				table.remove(self.entityEB, id)
+		if self.entityEB[id]:obtOwner() ~= i then
+			x2, y2 = v:getPosition()
+			w2, h2 = v:getDimensions()
+			if p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) then
+				v:hurt(true, self.entityEB[id]:getX(), self.entityEB[id]:getY(),  self.entityC[self.entityEB[id]:obtOwner()]:getForce())
+				--table.remove(self.entityEB, id)
+				print("borrado")
 				return true
 			end
 		end
 	end
 	for i, v in ipairs(self.entityEB) do
-		if v:getID() ~= i then
-			if p.isInEB(self.entityEB[id]:getPosition(), self.entityEB[id]:getDimensions(), v:getPosition(), v:getDimensions()) then
-				table.remove(self.entityEB, id)
-				table.remove(self.entityEB, v:getID())
+		if v:getID() ~= id then
+			x2, y2 = v:getPosition()
+			w2, h2 = v:getDimensions()
+			if p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) then
+				--table.remove(self.entityEB, id)
+				--table.remove(self.entityEB, v:getID())
 				return true
 			end
 		end
@@ -107,6 +98,7 @@ function stg:draw()
 		v:draw()
 	end
 	for i, v in ipairs(self.entityEB) do
+		print(i)
 		v:draw()
 	end
 end

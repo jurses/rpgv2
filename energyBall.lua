@@ -10,8 +10,8 @@ function energyBall.new(x, y, id, direction)
     s.stage = nil
     s.owner = id
     s.dir = direction
-    s.speed = 100
-    s.force = 1
+    s.speed = 600
+    s.force = 75
     s.type = "energyBall"
     setmetatable(s, energyBall_mt)
     return s
@@ -62,7 +62,6 @@ end
 
 function p.forward(obj)
     dt = love.timer.getDelta()
-    print(obj.dir)
     if obj.dir == "up" then
         obj.pos.y = obj.pos.y - obj.speed * dt
     elseif obj.dir == "left" then

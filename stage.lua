@@ -64,29 +64,34 @@ end
 function stg:collideEB(id, force)
 	x1, y1 = self.entityEB[id]:getPosition()
 	w1, h1 = self.entityEB[id]:getDimensions()
+
+	-- Colisión con personajes
 	for i, v in ipairs(self.entityC) do
 		if self.entityEB[id]:obtOwner() ~= i then
-			x2, y2 = v:getPosition()
+			x2, y2 = v:getCornerPos()
 			w2, h2 = v:getDimensions()
 			if p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) then
-				v:hurt(true, self.entityEB[id]:getX(), self.entityEB[id]:getY(),  self.entityC[self.entityEB[id]:obtOwner()]:getForce())
-				--table.remove(self.entityEB, id)
-				print("borrado")
+				print("Choque con personaje")
+				v:hurt(true, x1 + w1/2, x2 + w2/2,  force)
+				table.remove(self.entityEB, id)
 				return true
 			end
 		end
 	end
+	--[[
 	for i, v in ipairs(self.entityEB) do
 		if v:getID() ~= id then
 			x2, y2 = v:getPosition()
 			w2, h2 = v:getDimensions()
 			if p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) then
+				print("Choque con bola de energía")
 				--table.remove(self.entityEB, id)
 				--table.remove(self.entityEB, v:getID())
 				return true
 			end
 		end
 	end
+	]]
 end
 
 function stg:obtWorld()
@@ -98,7 +103,6 @@ function stg:draw()
 		v:draw()
 	end
 	for i, v in ipairs(self.entityEB) do
-		print(i)
 		v:draw()
 	end
 end

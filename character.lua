@@ -16,7 +16,7 @@ function char.new(w, x, y, r, bType, enableEntity)
 	s.attackArea = {w = r * 3 or 24, h = r * 3 or 24}
 	s.isNormal = true
 	s.tRecover = 0.7
-	s.tStart = love.timer.getTime()
+	s.start2Hurt = love.timer.getTime()
 	if enableEntity == nil or enableEntity == true then
 		s.enableEntity = true
 	else
@@ -29,6 +29,7 @@ function char.new(w, x, y, r, bType, enableEntity)
 	s.color = {r = 23, g = 128, b = 98}
 	s.colorAttack = {r = 228, g = 135, b = 49}
 	s.force = 500
+	s.unique = true
 	s.energyBall = nil
 	setmetatable(s, char_mt)
 	return s
@@ -131,7 +132,7 @@ end
 
 function char:hurt(signal, x, y, force)
 	if signal then
-		self.tStart = love.timer.getTime()
+		self.start2Hurt = love.timer.getTime()
 		self.color = {r = 255, g = 0, b = 0}
 	end
 	p.push(self, x, y, force)
@@ -151,7 +152,7 @@ function p.attack(obj)
 end
 
 function p.status(obj)
-	obj.isNormal = (love.timer.getTime() - obj.tStart) > obj.tRecover
+	obj.isNormal = (love.timer.getTime() - obj.start2Hurt) > obj.tRecover
 	if obj.isNormal then
 		obj.color = {r = 23, g = 128, b = 98}
 	end
@@ -161,8 +162,7 @@ function char:update()
 	p.move(self)
 	p.attack(self)
 	p.status(self)
-	p.shootEnergyBall(self)	
-	--print(self.id .. ", " .. self.body:getType() .. ", " .. string.format("%s", self.moving))
+	p.shootEnergyBall(self)
 end
 
 function char:getPosition()

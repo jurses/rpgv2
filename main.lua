@@ -22,6 +22,4 @@ function love.draw()
 	objM1:draw()
 	stage1:drawV(100, 100, char1:getID(), char2:getID())
 	love.graphics.setColor(255, 255, 255)
-	love.graphics.points(char1:getCornerPos())
-	love.graphics.points(char2:getCornerPos())
 end

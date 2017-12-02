@@ -2,35 +2,21 @@ local char = {}
 local p = {}
 local char_mt = {__index = char}
 local energyBall = require("energyBall")
+local charProp = require("charProp")
 
 function char.new(w, x, y, r, bType, enableEntity)
-	local s = {}
 	r = r or 16
-	s.type = "character"
+	local s = charProp.obtCharProp() or {}
 	s.body = love.physics.newBody(w, x, y, bType or "dynamic")
-	s.direction = "down"
-	s.moving = false
 	s.shape = love.physics.newCircleShape(r)
-	s.attack = false
-	s.dimensions = {w = 2 * r, h = 2 * r}
-	s.attackArea = {w = r * 3 or 24, h = r * 3 or 24}
-	s.isNormal = true
-	s.tRecover = 0.7
-	s.start2Hurt = love.timer.getTime()
+	s.fixt = love.physics.newFixture(s.body, s.shape)
+	s.fixt:setRestitution(0.9)
 	if enableEntity == nil or enableEntity == true then
 		s.enableEntity = true
 	else
 		s.enableEntity = false
 	end
-	s.fixt = love.physics.newFixture(s.body, s.shape)
-	s.fixt:setRestitution(0.9)
-	s.stage = nil
-	s.id = nil
-	s.color = {r = 23, g = 128, b = 98}
-	s.colorAttack = {r = 228, g = 135, b = 49}
-	s.force = 500
-	s.unique = true
-	s.energyBall = nil
+	print(s.color.r, s.color.g, s.color.b)
 	setmetatable(s, char_mt)
 	return s
 end

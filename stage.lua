@@ -73,7 +73,7 @@ function stg:collideEB(id, force)
 			if p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) then
 				print("Choque con personaje")
 				v:hurt(true, x1 + w1/2, x2 + w2/2,  force)
-				table.remove(self.entityEB, id)
+				--table.remove(self.entityEB, id)
 				return true
 			end
 		end

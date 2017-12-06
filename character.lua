@@ -1,8 +1,11 @@
+local energyBall = require("energyBall")
+local charProp = require("charProp")
+local quantum = require("quantum")
+
 local char = {}
 local p = {}
 local char_mt = {__index = char}
-local energyBall = require("energyBall")
-local charProp = require("charProp")
+
 
 function char.new(w, x, y, r, bType, enableEntity)
 	r = r or 16
@@ -10,13 +13,18 @@ function char.new(w, x, y, r, bType, enableEntity)
 	s.body = love.physics.newBody(w, x, y, bType or "dynamic")
 	s.shape = love.physics.newCircleShape(r)
 	s.fixt = love.physics.newFixture(s.body, s.shape)
+	s.last = {x, y}
 	s.fixt:setRestitution(0.9)
+	-- s.rate = quantum.new(0.7)
+	s.hurtTime = quantum.new(0.7) 
 	if enableEntity == nil or enableEntity == true then
 		s.enableEntity = true
 	else
 		s.enableEntity = false
 	end
-	print(s.color.r, s.color.g, s.color.b)
+	s.color[1] = s.colorNeutral[1]
+	s.color[2] = s.colorNeutral[2]
+	s.color[3] = s.colorNeutral[3]
 	setmetatable(s, char_mt)
 	return s
 end
@@ -88,7 +96,7 @@ function p.move(obj)
 		end
 	end
 	if not obj.moving then
-		if obj.isNormal then
+		if obj.cStatus == "neutral" then
 			obj.body:setLinearVelocity(0, 0)
 			obj.body:setType("static")
 		end
@@ -96,19 +104,35 @@ function p.move(obj)
 end
 
 function char:draw()
+	--[[
+	-- rango de ataque
+	love.graphics.setColor(self.colorAttack, 122)
+	love.graphics.rectangle("fill", self.body:getX() - self.attackArea.w / 2, self.body:getY() - self.attackArea.h / 2, self.attackArea.w, self.attackArea.h)
+	]]
+
 	if self.attack then
-		love.graphics.setColor(self.colorAttack.r, self.colorAttack.g, self.colorAttack.b)
+		-- hitbox del rango de ataque que se activa
+		love.graphics.setColor(self.colorAttack)
 		love.graphics.rectangle("fill", self.body:getX() - self.attackArea.w / 2, self.body:getY() - self.attackArea.h / 2, self.attackArea.w, self.attackArea.h)
 	end
-	love.graphics.setColor(255, 5, 100, 122)
+	-- hitbox del personaje
+	love.graphics.setColor(self.colorHurt)
 	love.graphics.rectangle("fill", self.body:getX() - self.dimensions.w/2, self.body:getY()- self.dimensions.h/2, self.dimensions.w, self.dimensions.h)
-	love.graphics.setColor(self.color.r, self.color.g, self.color.b)
+
+	-- personaje
+	love.graphics.setColor(self.color)
 	love.graphics.circle("fill", self.body:getX(), self.body:getY(), self.shape:getRadius())
-	love.graphics.setColor(self.colorAttack.r, self.colorAttack.g, self.colorAttack.b, 122)
-	love.graphics.rectangle("fill", self.body:getX() - self.attackArea.w / 2, self.body:getY() - self.attackArea.h / 2, self.attackArea.w, self.attackArea.h)
+
+	if self.cStatus == "hurt" then
+		love.graphics.line( self:getX(), self:getY(), self.last.x, self.last.y)
+	end
 end
 
+
+-- Función de empuje del objeto
 function p.push(obj, x, y, force)
+	obj.last.x = x
+	obj.last.y = y
 	vec = {x = obj.body:getX() - x, y = obj.body:getY() - y}
 	mod = math.sqrt(math.pow(vec.x, 2) + math.pow(vec.y, 2))
 	alpha = math.atan2(vec.y, vec.x)
@@ -116,11 +140,12 @@ function p.push(obj, x, y, force)
 	obj.body:applyLinearImpulse(force * math.cos(alpha), force * math.sin(alpha))
 end
 
-function char:hurt(signal, x, y, force)
-	if signal then
-		self.start2Hurt = love.timer.getTime()
-		self.color = {r = 255, g = 0, b = 0}
-	end
+function char:hurt(x, y, force)
+	self.hurtTime:refresh(0.7)
+	self.cStatus = "hurt"
+	self.color[1] = self.colorHurt[1]
+	self.color[2] = self.colorHurt[2]
+	self.color[3] = self.colorHurt[3]
 	p.push(self, x, y, force)
 end
 
@@ -138,9 +163,17 @@ function p.attack(obj)
 end
 
 function p.status(obj)
-	obj.isNormal = (love.timer.getTime() - obj.start2Hurt) > obj.tRecover
-	if obj.isNormal then
-		obj.color = {r = 23, g = 128, b = 98}
+	-- Sigue herido
+	if obj.cStatus == "hurt" then
+		obj.hurtTime:update()
+	end
+
+	-- Está herido pero su tiempo de herido ya pasó -> lo ponemos neutral
+	if obj.cStatus == "hurt" and obj.hurtTime:stateSignal() then
+		obj.color[1] = obj.colorNeutral[1]
+		obj.color[2] = obj.colorNeutral[2]
+		obj.color[3] = obj.colorNeutral[3]
+		obj.cStatus = "neutral"
 	end
 end
 

@@ -13,6 +13,7 @@ function energyBall.new(x, y, id, direction)
     s.speed = 600
     s.force = 75
     s.type = "energyBall"
+    s.ephimeral = true
     setmetatable(s, energyBall_mt)
     return s
 end
@@ -28,6 +29,10 @@ end
 
 function energyBall:getID()
     return self.id
+end
+
+function energyBall:isEphimeral()
+    return self.ephimeral
 end
 
 function energyBall:draw()
@@ -56,7 +61,7 @@ function energyBall:getY()
     return self.pos.y + self.dim.h/2
 end
 
-function energyBall:obtOwner()
+function energyBall:getOwner()
     return self.owner
 end
 

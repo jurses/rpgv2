@@ -56,7 +56,7 @@ function stg:charAttack(id)
 		d2.x, d2.y = v:getCornerPos()
 		d2.w, d2.h = v:getDimensions()
 		if id ~= i and p.checkCollision(d1.x, d1.y, d1.w, d1.h, d2.x, d2.y, d2.w, d2.h) then
-			v:hurt(true, x, y, self.entityC[id]:getForce())
+			v:hurt(x, y, self.entityC[id]:getForce())
 		end
 	end
 end
@@ -64,17 +64,17 @@ end
 function stg:collideEB(id, force)
 	x1, y1 = self.entityEB[id]:getPosition()
 	w1, h1 = self.entityEB[id]:getDimensions()
-
+	xo, yo = self.entityC[self.entityEB[id]:getOwner()]:getPosition()
 	-- Colisión con personajes
 	for i, v in ipairs(self.entityC) do
-		if self.entityEB[id]:obtOwner() ~= i then
+		if self.entityEB[id]:getOwner() ~= i then
 			x2, y2 = v:getCornerPos()
 			w2, h2 = v:getDimensions()
 			if p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) then
-				print("Choque con personaje")
-				v:hurt(true, x1 + w1/2, x2 + w2/2,  force)
-				--table.remove(self.entityEB, id)
-				return true
+				v:hurt(xo, yo,  force)
+				if self.entityEB[id]:isEphimeral() then
+					return
+				end
 			end
 		end
 	end

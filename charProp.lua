@@ -8,14 +8,17 @@ function charProp.obtCharProp()
         attack = false,
         dimensions = {w = 2 * r, h = 2 * r},
         attackArea = {w = r * 3 or 24, h = r * 3 or 24},
-        isNormal = true,
+        cStatus = "neutral",
         tRecover = 0.7,
         start2Hurt = love.timer.getTime(),
+        rateFire = 5,
         enableEntity = true,
         stage = nil,
         id = nil,
-        color = {r = 23, g = 128, b = 98},
-        colorAttack = {r = 228, g = 135, b = 49},
+        color = {},   -- color actual
+        colorNeutral = {23, 128, 98},  -- neutral
+        colorAttack = {228, 135, 49},   -- attack
+        colorHurt = {255, 0, 0},    -- hurted
         force = 500,
         unique = true,
         energyBall = nil

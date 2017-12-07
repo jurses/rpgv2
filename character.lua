@@ -16,7 +16,8 @@ function char.new(w, x, y, r, bType, enableEntity)
 	s.last = {x, y}
 	s.fixt:setRestitution(0.9)
 	-- s.rate = quantum.new(0.7)
-	s.hurtTime = quantum.new(0.7) 
+	s.hurtTime = quantum.new(0.7)
+
 	if enableEntity == nil or enableEntity == true then
 		s.enableEntity = true
 	else
@@ -43,8 +44,10 @@ function char:getStg(stage, id)
 end
 
 function p.shootEnergyBall(obj)
-	if love.keyboard.isDown("z") then
-		obj.stage:register(energyBall.new(obj.body:getX(), obj.body:getY(), obj.id, obj.direction))
+	if love.keyboard.isDown("z") and obj.shotAllow then
+		-- obj.stage:register(energyBall.new(obj.body:getX(), obj.body:getY(), obj.id, obj.direction))
+		table.insert(obj.projectil, energyBall.new(obj.body:getX(), obj.body:getY(), obj.id, obj.direction, obj.stage))
+		obj.shotAllow = false
 	end
 end
 
@@ -126,6 +129,10 @@ function char:draw()
 	if self.cStatus == "hurt" then
 		love.graphics.line( self:getX(), self:getY(), self.last.x, self.last.y)
 	end
+
+	for i, v in ipairs(self.projectil) do
+		v:draw()
+	end
 end
 
 
@@ -168,6 +175,9 @@ function p.status(obj)
 		obj.hurtTime:update()
 	end
 
+	if not obj.shotAllow and not love.keyboard.isDown("z") then
+		obj.shotAllow = true
+	end
 	-- Está herido pero su tiempo de herido ya pasó -> lo ponemos neutral
 	if obj.cStatus == "hurt" and obj.hurtTime:stateSignal() then
 		obj.color[1] = obj.colorNeutral[1]
@@ -182,6 +192,14 @@ function char:update()
 	p.attack(self)
 	p.status(self)
 	p.shootEnergyBall(self)
+	for i, v in ipairs(self.projectil) do
+		v:update()
+	end
+	for i, v in ipairs(self.projectil) do
+		if v:isDead() then
+			table.remove(self.projectil, i)
+		end
+	end
 end
 
 function char:getPosition()

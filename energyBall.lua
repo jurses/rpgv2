@@ -2,14 +2,15 @@ local energyBall = {}
 local p = {}
 local energyBall_mt = {__index = energyBall}
 
-function energyBall.new(x, y, id, direction)
+function energyBall.new(x, y, id, direction, stage)
     local s = {}
     s.id = nil
     s.dim = {w = 5, h = 5}
     s.pos = {x = x, y = y}
-    s.stage = nil
+    s.stage = stage
     s.owner = id
     s.dir = direction
+    s.dead = false
     s.speed = 600
     s.force = 75
     s.type = "energyBall"
@@ -42,11 +43,15 @@ end
 
 function energyBall:update()
     p.forward(self)
-    self.stage:collideEB(self.id, self.force)
+    self.dead = self.stage:collideEB(self.pos.x, self.pos.y, self.dim.w, self.dim.h, self.owner, self.force) -- necesito solo una función que me devuelva si hay colisión o no
 end
 
 function energyBall:getDimensions()
     return self.dim.w, self.dim.h
+end
+
+function energyBall:isDead()
+    return self.dead
 end
 
 function energyBall:getPosition()

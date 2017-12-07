@@ -11,6 +11,8 @@ function charProp.obtCharProp()
         cStatus = "neutral",
         tRecover = 0.7,
         start2Hurt = love.timer.getTime(),
+        hurtTime,
+        shotAllow = true,
         rateFire = 5,
         enableEntity = true,
         stage = nil,
@@ -21,7 +23,8 @@ function charProp.obtCharProp()
         colorHurt = {255, 0, 0},    -- hurted
         force = 500,
         unique = true,
-        energyBall = nil
+        energyBall = nil,
+        projectil = {}
     }
 end
 return charProp

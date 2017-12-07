@@ -34,9 +34,11 @@ function stg:update(dt)
 	for i, v in ipairs(self.entityC) do
 		v:update()
 	end
+	--[[
 	for i, v in ipairs(self.entityEB) do
 		v:update()
 	end
+	]]
 end
 
 function p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
@@ -61,23 +63,20 @@ function stg:charAttack(id)
 	end
 end
 
-function stg:collideEB(id, force)
-	x1, y1 = self.entityEB[id]:getPosition()
-	w1, h1 = self.entityEB[id]:getDimensions()
-	xo, yo = self.entityC[self.entityEB[id]:getOwner()]:getPosition()
+function stg:collideEB(x, y, w, h, owner, force)
+	xo, yo = self.entityC[owner]:getPosition()
 	-- Colisión con personajes
 	for i, v in ipairs(self.entityC) do
-		if self.entityEB[id]:getOwner() ~= i then
+		if owner ~= i then
 			x2, y2 = v:getCornerPos()
 			w2, h2 = v:getDimensions()
-			if p.checkCollision(x1, y1, w1, h1, x2, y2, w2, h2) then
+			if p.checkCollision(x, y, w, h, x2, y2, w2, h2) then
 				v:hurt(xo, yo,  force)
-				if self.entityEB[id]:isEphimeral() then
-					return
-				end
+				return true
 			end
 		end
 	end
+	return false
 	--[[
 	for i, v in ipairs(self.entityEB) do
 		if v:getID() ~= id then

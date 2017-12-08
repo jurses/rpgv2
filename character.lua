@@ -15,7 +15,6 @@ function char.new(w, x, y, r, bType, enableEntity)
 	s.fixt = love.physics.newFixture(s.body, s.shape)
 	s.last = {x, y}
 	s.fixt:setRestitution(0.9)
-	-- s.rate = quantum.new(0.7)
 	s.hurtTime = quantum.new(0.7)
 
 	if enableEntity == nil or enableEntity == true then
@@ -45,7 +44,6 @@ end
 
 function p.shootEnergyBall(obj)
 	if love.keyboard.isDown("z") and obj.shotAllow then
-		-- obj.stage:register(energyBall.new(obj.body:getX(), obj.body:getY(), obj.id, obj.direction))
 		table.insert(obj.projectil, energyBall.new(obj.body:getX(), obj.body:getY(), obj.id, obj.direction, obj.stage))
 		obj.shotAllow = false
 	end

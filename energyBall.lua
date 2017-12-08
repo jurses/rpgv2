@@ -6,12 +6,12 @@ function energyBall.new(x, y, id, direction, stage)
     local s = {}
     s.id = nil
     s.dim = {w = 5, h = 5}
-    s.pos = {x = x, y = y}
+    s.pos = {x = x - s.dim.w/2, y = y - s.dim.h/2}
     s.stage = stage
     s.owner = id
     s.dir = direction
     s.dead = false
-    s.speed = 600
+    s.speed = 50
     s.force = 75
     s.type = "energyBall"
     s.ephimeral = true

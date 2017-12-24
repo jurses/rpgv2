@@ -6,6 +6,7 @@ function charProp.obtCharProp()
         direction = "down",
         moving = false,
         attack = false,
+        life = 100,
         dimensions = {w = 2 * r, h = 2 * r},
         attackArea = {w = r * 3 or 24, h = r * 3 or 24},
         cStatus = "neutral",

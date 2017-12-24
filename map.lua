@@ -18,8 +18,21 @@ function p.obtFixtT(layers, world)
 	return fixT
 end
 
-function p.configureCanvas(canvas, fixture_t)
-	love.graphics.setCanvas(canvas)
+function p.obtSpriteBatchT(tilesets, layers)
+	auxSpriteBatch = {}
+	auxTileSet = {}
+	for i, v in ipairs(tilesets) do
+		table.insert(auxTileSet, love.graphics.newImage(v.image))
+	end
+	for i, v in ipairs(layers) do
+		if type == "tilelayer" then
+			table.insert(auxSpriteBatch, love.graphics.newSpriteBatch())
+		end
+	end
+end
+
+function p.configureCanvas(obsCanvas, fixture_t)
+	love.graphics.setCanvas(obsCanvas)
 	love.graphics.clear()
 	love.graphics.setColor(255, 255, 255)
 	for i, v in ipairs(fixture_t) do
@@ -28,18 +41,20 @@ function p.configureCanvas(canvas, fixture_t)
 	love.graphics.setCanvas()
 end
 
-function map.new(mapa, world)
+function map.new(nMap, world)
 	local s = {}
-	s.canvas = love.graphics.newCanvas(mapa.width * mapa.tilewidth, mapa.height * mapa.tileheight)
-	s.fixtT = p.obtFixtT(mapa.layers, world)
-	p.configureCanvas(s.canvas, s.fixtT)
+	s.obsCanvas = love.graphics.newCanvas(nMap.width * nMap.tilewidth, nMap.height * nMap.tileheight)	-- obstáculos
+	s.fixtT = p.obtFixtT(nMap.layers, world)
+	p.configureCanvas(s.obsCanvas, s.fixtT)
+	s.spriteBatchT = p.obtSpriteBatchT(nmap.tilesets, nmpa.layers)
 	setmetatable(s, map_mt)
 	return s
 end
 
 function map:draw()
 	love.graphics.setColor(255, 255, 255)
-	love.graphics.draw(self.canvas)
+	love.graphics.draw(self.obsCanvas)
+	love.graphics.draw(self.worldMap)
 end
 
 return map
